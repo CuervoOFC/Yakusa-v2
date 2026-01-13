@@ -70,4 +70,5 @@ Desarrollado como parte del ecosistema **Mochi Bot**.
 
 Creador --> **Manuel VG**,
 
+
 > **Aviso:** Este proyecto es para fines educativos. El uso indebido para spam puede resultar en el baneo de la cuenta de WhatsApp por parte de Meta.
