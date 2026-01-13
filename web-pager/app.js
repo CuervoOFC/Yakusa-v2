@@ -2,14 +2,16 @@ import express from 'express';
 import session from 'express-session';
 import fs from 'fs';
 import path from 'path';
+import chalk from 'chalk';
+import bcrypt from 'bcrypt';
 import { fileURLToPath } from 'url';
 import { toBuffer } from 'qrcode';
 import { subBots, iniciarJadibot, stopJadibot } from '../lib/jadibot-manager.js';
-import chalk from 'chalk';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const port = 3000;
+const saltRounds = 10;
 const USERS_FILE = './database/usuario.json';
 
 // --- CONFIGURACIÓN DE CARPETAS ---
@@ -42,40 +44,92 @@ const isAuthenticated = (req, res, next) => {
     res.redirect('/login');
 };
 
-// --- RUTAS DE AUTENTICACIÓN ---
+
+// --- RUTA LOGIN ---
 app.get('/login', (req, res) => res.send(getHTML('login')));
-app.post('/login', (req, res) => {
-    const { email, password } = req.body;
+app.post('/login', async (req, res) => {
+    const { identifier, password } = req.body; // Cambiado a 'identifier' para soportar user/email
     const users = getUsers();
-    const user = users.find(u => u.email === email && u.password === password);
+    
+    // Buscar por email o por nombre de usuario
+    const user = users.find(u => u.email === identifier || u.name === identifier);
+
     if (user) {
-        req.session.user = user;
-        res.redirect('/');
-    } else {
-        res.send("<script>alert('Credenciales incorrectas'); window.location='/login';</script>");
+        // COMPARACIÓN SEGURA CON BCRYPT
+        const match = await bcrypt.compare(password, user.password);
+        if (match) {
+            req.session.user = { name: user.name, email: user.email };
+            return res.redirect('/');
+        }
+    }
+    
+    // Si falla, enviamos error por URL para activar SweetAlert2
+    res.redirect('/login?error=auth');
+});
+
+// --- RUTA REGISTRO ---
+app.get('/register', (req, res) => res.send(getHTML('register')));
+app.post('/register', async (req, res) => {
+    const { name, email, phone, password } = req.body;
+    const users = getUsers();
+
+    if (users.find(u => u.email === email || u.name === name)) {
+        return res.redirect('/register?error=exists');
+    }
+
+    try {
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+        
+        users.push({ 
+            name, 
+            email, 
+            phone, 
+            password: hashedPassword,
+            created_at: new Date() 
+        });
+        
+        saveUsers(users);
+        res.redirect('/login?success=registered');
+    } catch (e) {
+        res.redirect('/register?error=server');
     }
 });
 
-app.get('/register', (req, res) => res.send(getHTML('register')));
-app.post('/register', (req, res) => {
-    const { name, email, phone, password } = req.body;
-    const users = getUsers();
-    if (users.find(u => u.email === email)) return res.send("Correo ya existe");
-    users.push({ name, email, phone, password });
-    saveUsers(users);
-    res.redirect('/login');
+
+// Ruta para actualizar ajustes del bot desde el Dashboard
+app.get('/update-config/:id/:setting', isAuthenticated, (req, res) => {
+    const { id, setting } = req.params;
+    const jid = `${id}@s.whatsapp.net`;
+    const session = jadibotSess.get(jid);
+
+    if (!session) {
+        return res.status(404).json({ status: false, message: 'Sesión no encontrada' });
+    }
+
+    if (!session.config) {
+        session.config = { welcome: true, only_private: false };
+    }
+
+    session.config[setting] = !session.config[setting];
+
+    jadibotSess.set(jid, session);
+
+    console.log(`[CONFIG] ${id} actualizó ${setting} a: ${session.config[setting]}`);
+    
+    res.json({ 
+        status: true, 
+        newValue: session.config[setting] 
+    });
 });
 
 // --- RUTA PRINCIPAL (DASHBOARD CORREGIDA) ---
 app.get('/', isAuthenticated, (req, res) => {
     let botsHTML = '';
 
-    // Iteramos sobre las sesiones activas en subBots
     subBots.forEach((client, id) => {
         const num = id.split('@')[0];
         const sessionData = jadibotSess.get(id) || { config: { welcome: true, only_private: false } };
         
-        // Verificamos el estado de los switches para que la UI coincida con la realidad
         const welcomeChecked = sessionData.config?.welcome ? 'checked' : '';
         const privateChecked = sessionData.config?.only_private ? 'checked' : '';
 
@@ -178,19 +232,68 @@ app.post('/vincular', isAuthenticated, (req, res) => {
     res.redirect(method === 'code' ? `/view-code/${cleanNumber}` : `/view-qr/${cleanNumber}`);
 });
 
-app.get('/view-code/:id', isAuthenticated, (req, res) => {
+app.get('/api/bot-status/:id', isAuthenticated, (req, res) => {
     const jid = `${req.params.id}@s.whatsapp.net`;
     const data = jadibotSess.get(jid);
+    res.json({ status: data?.status || 'disconnected' });
+});
+
+app.get('/view-code/:id', isAuthenticated, (req, res) => {
+    const id = req.params.id;
+    const jid = `${id}@s.whatsapp.net`;
+    const data = jadibotSess.get(jid);
+
+    // Si ya está conectado, no tiene sentido ver el código, lo mandamos al home
+    if (data?.status === 'connected') {
+        return res.redirect('/?status=success');
+    }
+
     let html = getHTML('view-code');
+    html = html.replace(/{{ID}}/g, id); // Importante para el script de chequeo
     html = html.replace('{{CODE}}', data?.pairingCode || "GENERANDO...");
     html = html.replace('{{STATUS}}', data?.pairingCode ? "LISTO" : "CONECTANDO...");
-    res.send(html);
+    
+    // Inyectamos el script de auto-redirección
+    const autoRedirectScript = `
+        <script>
+            setInterval(async () => {
+                try {
+                    const res = await fetch('/api/bot-status/${id}');
+                    const json = await res.json();
+                    if (json.status === 'connected') window.location.href = '/?status=success';
+                } catch (e) {}
+            }, 3000);
+        </script>
+    `;
+    
+    res.send(html.replace('</body>', autoRedirectScript + '</body>'));
 });
 
 app.get('/view-qr/:id', isAuthenticated, (req, res) => {
+    const id = req.params.id;
+    const jid = `${id}@s.whatsapp.net`;
+    const data = jadibotSess.get(jid);
+
+    if (data?.status === 'connected') {
+        return res.redirect('/?status=success');
+    }
+
     let html = getHTML('view-qr');
-    html = html.replace(/{{ID}}/g, req.params.id);
-    res.send(html);
+    html = html.replace(/{{ID}}/g, id);
+    
+    const autoRedirectScript = `
+        <script>
+            setInterval(async () => {
+                try {
+                    const res = await fetch('/api/bot-status/${id}');
+                    const json = await res.json();
+                    if (json.status === 'connected') window.location.href = '/?status=success';
+                } catch (e) {}
+            }, 3000);
+        </script>
+    `;
+    
+    res.send(html.replace('</body>', autoRedirectScript + '</body>'));
 });
 
 app.get('/qr-img/:id', async (req, res) => {

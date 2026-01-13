@@ -5,73 +5,67 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <title>Mochi Bot | Login</title>
     <style>
-        .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-in { animation: slideUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #050110; }
+        .glass { background: rgba(15, 7, 30, 0.6); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-in { animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @media screen and (max-width: 768px) { input { font-size: 16px !important; } }
+        .swal2-popup { background: rgba(15, 7, 30, 0.95) !important; backdrop-filter: blur(15px); border: 1px solid rgba(168, 85, 247, 0.2); border-radius: 2.5rem; color: white; }
+        .swal2-confirm { background: #a855f7 !important; border-radius: 1rem !important; }
     </style>
 </head>
-<body class="bg-[#020617] text-white flex items-center justify-center min-h-[100dvh] font-sans overflow-x-hidden p-4 sm:p-8">
-    
-    <div class="fixed top-[-10%] left-[-10%] w-[60%] h-[60%] bg-cyan-600/10 rounded-full blur-[100px] pointer-events-none"></div>
-    <div class="fixed bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-blue-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+<body class="text-white flex items-center justify-center min-h-[100dvh] overflow-x-hidden p-4">
+    <div class="fixed top-[-10%] right-[-10%] w-[60%] h-[50%] bg-purple-600/10 rounded-full blur-[110px] pointer-events-none"></div>
+    <div class="fixed bottom-[-10%] left-[-10%] w-[60%] h-[50%] bg-indigo-600/10 rounded-full blur-[110px] pointer-events-none"></div>
 
     <div class="relative z-10 w-full max-w-[400px] animate-in">
-        <div class="glass p-6 sm:p-10 rounded-[2rem] sm:rounded-[3rem] border border-white/10 shadow-2xl">
-            
+        <div class="glass p-6 sm:p-10 rounded-[2.5rem] border border-white/5 shadow-2xl relative overflow-hidden">
+            <div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-purple-500 to-transparent opacity-40"></div>
+
             <div class="flex flex-col items-center mb-8">
-                <div class="relative group">
-                    <div class="absolute -inset-1 bg-cyan-500 rounded-full blur opacity-20 group-hover:opacity-40 transition"></div>
-                    <img src="https://avatars.githubusercontent.com/u/250554332?v=4" class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full border-2 border-slate-800 object-cover shadow-2xl">
+                <div class="relative w-20 h-20 rounded-full p-1 bg-[#050110] border border-purple-500/30">
+                    <img src="https://avatars.githubusercontent.com/u/250554332?v=4" class="w-full h-full rounded-full object-cover">
                 </div>
-                <h1 class="text-3xl sm:text-4xl font-black mt-4 tracking-tighter uppercase italic">Mochi Bot</h1>
-                <p class="text-slate-500 text-xs sm:text-sm font-medium tracking-widest uppercase mt-1">Acceso al Panel</p>
+                <h1 class="text-3xl font-black mt-5 tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-purple-200 uppercase italic">Mochi Login</h1>
+                <p class="text-slate-500 text-[10px] tracking-[4px] uppercase font-bold mt-1">Bienvenido</p>
             </div>
 
-            <form action="/login" method="POST" class="space-y-4 sm:space-y-6">
-                <div class="space-y-2">
-                    <div class="relative">
-                        <i data-lucide="mail" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500"></i>
-                        <input type="email" name="email" placeholder="Correo Electrónico" required 
-                            class="w-full bg-slate-950/50 border border-slate-800 rounded-2xl p-4 pl-12 text-sm outline-none focus:border-cyan-500/50 focus:ring-4 focus:ring-cyan-500/10 transition-all">
-                    </div>
+            <form action="/login" method="POST" class="space-y-4">
+                <div class="relative group">
+                    <i data-lucide="user" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-purple-400 transition-colors"></i>
+                    <input type="text" name="identifier" placeholder="Usuario o correo" required class="w-full bg-black/40 border border-white/5 rounded-2xl p-4 pl-12 text-sm outline-none focus:border-purple-500/50 focus:ring-4 focus:ring-purple-500/10 transition-all">
                 </div>
-
-                <div class="space-y-2">
-                    <div class="relative">
-                        <i data-lucide="lock" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500"></i>
-                        <input id="password" type="password" name="password" placeholder="Contraseña" required 
-                            class="w-full bg-slate-950/50 border border-slate-800 rounded-2xl p-4 pl-12 text-sm outline-none focus:border-cyan-500/50 focus:ring-4 focus:ring-cyan-500/10 transition-all">
-                        <button type="button" onclick="togglePassword()" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-cyan-400 p-1">
-                            <i id="eye-icon" data-lucide="eye" class="w-5 h-5"></i>
-                        </button>
-                    </div>
+                <div class="relative group">
+                    <i data-lucide="lock" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-purple-400 transition-colors"></i>
+                    <input id="password" type="password" name="password" placeholder="Tu contraseña" required class="w-full bg-black/40 border border-white/5 rounded-2xl p-4 pl-12 text-sm outline-none focus:border-purple-500/50 focus:ring-4 focus:ring-purple-500/10 transition-all">
+                    <button type="button" onclick="togglePassword()" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"><i id="eye-icon" data-lucide="eye" class="w-5 h-5"></i></button>
                 </div>
-
-                <button type="submit" class="w-full bg-white text-black font-black p-4 rounded-2xl hover:bg-cyan-400 transition-all duration-300 active:scale-95 text-sm uppercase tracking-widest">
-                    Entrar ahora
-                </button>
+                <button type="submit" class="w-full bg-white text-black font-black p-4 rounded-2xl mt-4 hover:bg-purple-500 hover:text-white transition-all duration-300 active:scale-95 uppercase tracking-widest text-sm shadow-xl shadow-white/5">Entrar Ahora</button>
             </form>
 
             <div class="mt-8 pt-6 border-t border-white/5 text-center">
-                <a href="/register" class="text-slate-400 text-xs sm:text-sm hover:text-white transition">
-                    ¿No tienes cuenta? <span class="text-cyan-400 font-bold ml-1">Regístrate</span>
-                </a>
+                <a href="/register" class="text-purple-400 font-bold text-sm">¿No tienes cuenta? Regístrate</a>
             </div>
         </div>
-        <p class="text-center text-slate-700 text-[10px] mt-6 tracking-[5px] uppercase">iOS & PC Optimized</p>
     </div>
 
     <script>
         lucide.createIcons();
         function togglePassword() {
-            const input = document.getElementById('password');
-            const icon = document.getElementById('eye-icon');
-            input.type = input.type === 'password' ? 'text' : 'password';
-            icon.setAttribute('data-lucide', input.type === 'password' ? 'eye' : 'eye-off');
-            lucide.createIcons();
+            const p = document.getElementById('password'); const i = document.getElementById('eye-icon');
+            p.type = p.type === 'password' ? 'text' : 'password';
+            i.setAttribute('data-lucide', p.type === 'password' ? 'eye' : 'eye-off'); lucide.createIcons();
         }
+        window.onload = () => {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('error') === 'auth') Swal.fire({ icon: 'error', title: 'Error', text: 'Usuario o clave incorrectos.', confirmButtonColor: '#a855f7' });
+            if (params.get('success')) Swal.fire({ icon: 'success', title: '¡Perfecto!', text: 'Ya puedes iniciar sesión.', confirmButtonColor: '#a855f7' });
+            window.history.replaceState({}, document.title, window.location.pathname);
+        };
     </script>
 </body>
 </html>

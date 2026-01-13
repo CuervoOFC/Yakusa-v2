@@ -5,51 +5,74 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <title>Mochi Bot | Código</title>
+    <title>Mochi Bot | Enlace</title>
     <style>
-        .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
-        .code-char { background: linear-gradient(135deg, #fff 0%, #94a3b8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #050110; color: white; }
+        .glass { background: rgba(15, 7, 30, 0.6); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); }
+        .code-display { background: linear-gradient(135deg, #fff 0%, #a855f7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 30px rgba(168, 85, 247, 0.3); }
+        @keyframes pulse-border { 0%, 100% { border-color: rgba(168, 85, 247, 0.2); } 50% { border-color: rgba(168, 85, 247, 0.6); } }
+        .animate-border { animation: pulse-border 2s infinite; }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        .animate-scale { animation: scaleIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     </style>
 </head>
-<body class="bg-[#020617] text-white flex items-center justify-center min-h-[100dvh] p-6 overflow-hidden">
-    
-    <div class="fixed inset-0 bg-blue-600/5 rounded-full blur-[120px] pointer-events-none"></div>
+<body class="flex items-center justify-center min-h-[100dvh] p-6 overflow-hidden">
+    <div class="fixed inset-0 pointer-events-none">
+        <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-purple-600/10 rounded-full blur-[120px]"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-indigo-600/10 rounded-full blur-[120px]"></div>
+    </div>
 
-    <div class="relative z-10 w-full max-w-md text-center">
-        <div class="glass p-8 sm:p-12 rounded-[3rem] border border-white/10 shadow-2xl">
-            
-            <div class="mb-8">
-                <div class="bg-blue-500/10 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-blue-500/20">
-                    <i data-lucide="smartphone" class="w-8 h-8 text-blue-400"></i>
+    <div class="relative z-10 w-full max-w-md text-center animate-scale">
+        <div class="glass p-8 sm:p-12 rounded-[3rem] border border-white/5 shadow-2xl relative">
+            <div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-purple-500 to-transparent opacity-40"></div>
+
+            <div class="mb-10">
+                <div class="relative w-20 h-20 mx-auto mb-6">
+                    <div class="absolute inset-0 bg-purple-500/20 blur-xl rounded-3xl"></div>
+                    <div class="relative bg-[#050110] w-full h-full rounded-3xl flex items-center justify-center border border-purple-500/30">
+                        <i data-lucide="smartphone" class="w-10 h-10 text-purple-400"></i>
+                    </div>
                 </div>
-                <h1 class="text-xl font-black uppercase tracking-[4px] text-blue-400">Código de Enlace</h1>
-                <p class="text-slate-500 text-xs mt-2 uppercase">Ingrésalo en tu WhatsApp</p>
+                <h1 class="text-2xl font-black uppercase tracking-[4px] bg-clip-text text-transparent bg-gradient-to-b from-white to-slate-400">Código de Enlace</h1>
+                <p class="text-slate-500 text-[10px] mt-3 uppercase font-bold tracking-widest leading-relaxed">Abre WhatsApp > Dispositivos vinculados > Vincular con número</p>
             </div>
 
-            <div class="bg-black/40 border border-white/5 py-8 rounded-[2rem] mb-6 relative overflow-hidden group">
-                <div class="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                <span class="text-5xl sm:text-6xl font-mono font-black tracking-widest code-char italic">
-                    {{CODE}}
+            <div class="bg-black/40 border-2 border-white/5 py-10 rounded-[2.5rem] mb-8 relative animate-border">
+                <span class="text-5xl sm:text-7xl font-mono font-black tracking-[0.2em] code-display italic">{{CODE}}</span>
+            </div>
+
+            <div class="flex items-center justify-center gap-3 mb-10 bg-white/5 py-3 px-6 rounded-2xl w-fit mx-auto border border-white/5">
+                <span class="relative flex h-2.5 w-2.5">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-purple-500"></span>
                 </span>
+                <p class="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em]">{{STATUS}}</p>
             </div>
 
-            <div class="flex items-center justify-center gap-2 mb-8 bg-slate-900/50 py-2 px-4 rounded-full w-fit mx-auto border border-white/5">
-                <span class="relative flex h-2 w-2">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-                </span>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{STATUS}}</p>
-            </div>
-
-            <a href="/" class="flex items-center justify-center gap-2 w-full bg-white text-black font-black py-4 rounded-2xl hover:bg-blue-400 transition-all active:scale-95 uppercase text-xs tracking-widest">
-                <i data-lucide="arrow-left" class="w-4 h-4"></i> Volver al panel
+            <a href="/" class="flex items-center justify-center gap-3 w-full bg-white text-black font-black py-5 rounded-2xl hover:bg-purple-500 hover:text-white transition-all duration-300 active:scale-95 uppercase text-[11px] tracking-[0.2em]">
+                <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Volver al Panel
             </a>
         </div>
     </div>
 
     <script>
         lucide.createIcons();
-        setTimeout(() => location.reload(), 8000);
+        // Polling para redirección automática
+        const id = "{{ID}}";
+        const checkStatus = setInterval(async () => {
+            try {
+                const res = await fetch(`/api/bot-status/${id}`);
+                const data = await res.json();
+                if (data.status === 'connected') {
+                    clearInterval(checkStatus);
+                    window.location.href = '/?status=success';
+                }
+            } catch (e) {}
+        }, 3000);
+
+        // Recargar si el código expira (2 minutos)
+        setTimeout(() => location.reload(), 120000);
     </script>
 </body>
 </html>

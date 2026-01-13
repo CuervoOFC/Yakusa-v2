@@ -1,9 +1,10 @@
-// plugins/play.js
 import axios from 'axios';
 
-let handler = async (m, { conn, text, usedPrefix, command }) => {
+let handler = async (m, { conn, text, command }) => {
+    // 1. Validación rápida usando el config o mensajes directos
     if (!text) return m.reply(`「✦」Ingresa el nombre o link de la canción.`);
 
+    // 2. Reacción de "procesando" (ya soporta await gracias a simple.js)
     await m.react('🕒');
 
     try {
@@ -12,37 +13,39 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
         if (!json.success) {
             await m.react('❌');
-            return m.reply("「✦」No se pudo procesar la solicitud.");
+            return m.reply("「✦」No se pudo encontrar el video.");
         }
 
         const { titulo, canal, duracion, imagen, url, id } = json.data;
 
-        let txt = `「✦」*DESCARGANDO AUDIO*\n\n`
+        let txt = `「✦」*BRAILLE BOT - PLAY*\n\n`
             txt += `> 🎵 *Título:* ${titulo}\n`
             txt += `> ❀ *Canal:* ${canal}\n`
-            txt += `> ⴵ *Duración:* ${duracion}`
+            txt += `> ⴵ *Duración:* ${duracion}\n\n`
+            txt += `_Enviando audio, espere un momento..._`
 
+        // Enviamos la miniatura con la info
         await conn.sendMessage(m.chat, { image: { url: imagen }, caption: txt }, { quoted: m });
 
+        // 3. Descarga del buffer
         const response = await axios.get(url, { 
             responseType: 'arraybuffer',
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36'
-            }
+            headers: { 'User-Agent': 'Mozilla/5.0' }
         });
         
         const audioBuffer = Buffer.from(response.data);
 
+        // 4. Envío del audio con ExternalAdReply (Miniatura en el reproductor)
         await conn.sendMessage(m.chat, {
             audio: audioBuffer,
             mimetype: 'audio/mp4',
             fileName: `${titulo}.mp3`,
-            ptt: false,
+            ptt: false, // Cambia a true si quieres que se envíe como nota de voz
             contextInfo: {
                 externalAdReply: {
                     showAdAttribution: true,
                     title: titulo,
-                    body: canal,
+                    body: 'BrailleBot - Audio Player',
                     thumbnailUrl: imagen,
                     sourceUrl: `https://www.youtube.com/watch?v=${id}`,
                     mediaType: 1,
@@ -56,9 +59,12 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     } catch (e) {
         console.error(e);
         await m.react('❌');
-        m.reply("「✦」Error al descargar el archivo. El servidor de YouTube rechazó la conexión directa.");
+        m.reply("「✦」Error: El servidor está saturado o el link es inválido.");
     }
 }
 
+// Vinculamos el comando
 handler.command = ['play', 'audio', 'mp3'];
+
+// Exportación única
 export default handler;

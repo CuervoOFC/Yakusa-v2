@@ -12,8 +12,8 @@ export const handler = async (conn, m) => {
         const str = m.body.trim();
         let usedPrefix = '';
         let isPrefix = false;
-        const prefixMatch = config.prefix.test(str);
         
+        const prefixMatch = config.prefix.test(str);
         if (prefixMatch) {
             usedPrefix = str.match(config.prefix)[0];
             isPrefix = true;
@@ -29,31 +29,43 @@ export const handler = async (conn, m) => {
         );
 
         if (plugin) {
-            logger.command(m, command, usedPrefix, isPrefix);
+            // --- DETECCIÓN DE DUEÑO REFORZADA ---
+            const senderNumber = m.sender.replace(/[^0-9]/g, ''); // Ejemplo: 51900000000
+            
+            // Verificamos si el número de quien escribe está en la lista de dueños
+            const isOwner = config.owners.some(([number]) => {
+                const cleanOwner = number.replace(/[^0-9]/g, '');
+                return senderNumber === cleanOwner; // Comparación exacta
+            }) || m.fromMe; 
 
-            // MEJORA: Detección profunda de multimedia
+            // LOG PARA DEBUG (Míralo en tu terminal para ver si detecta el isOwner como true o false)
+            console.log(chalk.magenta(`[COMMAND] ${command} | isOwner: ${isOwner}`));
+
+            // Bloqueo si el comando requiere dueño (plugin.owner)
+            if (plugin.owner === true) { 
+                if (!isOwner) {
+                    await m.react('🚫');
+                    return m.reply(config.messages.owner); // Bloquea a los demás
+                }
+            }
+
+            if (plugin.group && !m.isGroup) return m.reply(config.messages.group);
+            if (plugin.private && m.isGroup) return m.reply(config.messages.private);
+
+            logger.command(m, command, usedPrefix, isPrefix);
+            
             let q = m.quoted ? m.quoted : m;
-            let mime = (q.msg || q).mimetype || (q.mediaMessage?.imageMessage || q.mediaMessage?.videoMessage)?.mimetype || '';
+            let mime = (q.msg || q).mimetype || '';
             let isMedia = /image|video|sticker|audio/.test(mime);
 
-            const extra = {
-                conn,
-                text,
-                command,
-                usedPrefix,
-                isPrefix,
-                apikey: config.apiKey,
-                args,
-                q,
-                mime,
-                isMedia
-            };
+            const extra = { conn, text, command, usedPrefix, isPrefix, apikey: config.apiKey, args, q, mime, isMedia, config, isOwner };
 
             try {
                 await plugin(m, extra);
             } catch (e) {
                 logger.error(command, e);
-                m.reply(`*「✦」Error en: ${command.toUpperCase()}*\n\n> ${e.message || e}`);
+                await m.react('❌');
+                m.reply(`*ERROR:* ${e.message || e}`);
             }
         }
     } catch (e) {

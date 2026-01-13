@@ -5,57 +5,80 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <title>Mochi Bot | QR</title>
+    <title>Mochi Bot | QR Login</title>
     <style>
-        .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
-        .qr-frame::before {
-            content: ''; position: absolute; inset: -10px;
-            border: 2px solid #22d3ee; border-radius: 2rem;
-            mask: conic-gradient(from 0deg, white 0%, transparent 25%, white 50%, transparent 75%, white 100%);
-            animation: rotate 4s linear infinite;
-        }
-        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #050110; color: white; }
+        .glass { background: rgba(15, 7, 30, 0.6); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); }
+        .qr-wrapper { position: relative; padding: 12px; background: white; border-radius: 2rem; box-shadow: 0 0 50px rgba(168, 85, 247, 0.2); }
+        .qr-frame-glow { position: absolute; inset: -4px; background: linear-gradient(45deg, #a855f7, #6366f1, #a855f7); background-size: 200% 200%; border-radius: 2.2rem; z-index: -1; animation: moveGradient 4s linear infinite; }
+        @keyframes moveGradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes fadeInScale { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .animate-qr { animation: fadeInScale 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     </style>
 </head>
-<body class="bg-[#020617] text-white flex items-center justify-center min-h-[100dvh] p-6 overflow-hidden">
-    
-    <div class="fixed inset-0 bg-cyan-600/5 rounded-full blur-[120px] pointer-events-none"></div>
+<body class="flex items-center justify-center min-h-[100dvh] p-6 overflow-hidden">
+    <div class="fixed inset-0 pointer-events-none">
+        <div class="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-600/10 rounded-full blur-[120px]"></div>
+        <div class="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-600/10 rounded-full blur-[120px]"></div>
+    </div>
 
-    <div class="relative z-10 w-full max-w-md text-center">
-        <div class="glass p-8 sm:p-12 rounded-[3rem] border border-white/10 shadow-2xl">
-            
-            <header class="mb-8">
-                <h1 class="text-2xl font-black uppercase tracking-[4px] text-cyan-400 italic">Escaneo QR</h1>
-                <div class="flex items-center justify-center gap-2 mt-2">
-                    <i data-lucide="hash" class="w-3 h-3 text-slate-500"></i>
-                    <p class="text-slate-500 text-[10px] font-bold tracking-widest uppercase">ID: {{ID}}</p>
+    <div class="relative z-10 w-full max-w-md text-center animate-qr">
+        <div class="glass p-8 sm:p-12 rounded-[3rem] border border-white/5 shadow-2xl relative">
+            <div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-purple-500 to-transparent opacity-40"></div>
+
+            <header class="mb-10">
+                <div class="flex items-center justify-center gap-3 mb-4">
+                    <div class="bg-purple-500/10 p-2 rounded-lg"><i data-lucide="qr-code" class="w-6 h-6 text-purple-400"></i></div>
+                    <h1 class="text-2xl font-black uppercase tracking-[4px] bg-clip-text text-transparent bg-gradient-to-b from-white to-slate-400 italic">Escaneo QR</h1>
+                </div>
+                <div class="bg-white/5 py-1.5 px-4 rounded-full w-fit mx-auto border border-white/5">
+                    <p class="text-slate-400 text-[10px] font-bold tracking-[2px] uppercase">ID: {{ID}}</p>
                 </div>
             </header>
 
             <div class="relative inline-block mb-10">
-                <div class="qr-frame relative bg-white p-4 rounded-3xl shadow-[0_0_50px_rgba(34,211,238,0.15)]">
+                <div class="qr-frame-glow"></div>
+                <div class="qr-wrapper">
                     <img src="/qr-img/{{ID}}" alt="QR" class="w-56 h-56 sm:w-64 sm:h-64 rounded-xl">
                 </div>
             </div>
 
             <div class="space-y-6">
-                <div class="bg-cyan-500/5 border border-cyan-500/20 py-3 px-6 rounded-2xl">
-                    <p class="text-[10px] text-cyan-400 font-bold uppercase tracking-[2px] animate-pulse">
-                        Esperando escaneo...
-                    </p>
+                <div class="flex items-center justify-center gap-3 bg-purple-500/5 border border-purple-500/10 py-4 px-6 rounded-2xl">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
+                    </span>
+                    <p class="text-[10px] text-purple-300 font-black uppercase tracking-[3px]">Esperando escaneo</p>
                 </div>
-
-                <a href="/" class="flex items-center justify-center gap-2 w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 rounded-2xl transition-all active:scale-95 text-xs uppercase tracking-widest border border-white/5">
-                    <i data-lucide="chevron-left" class="w-4 h-4"></i> Cancelar proceso
-                </a>
+                <a href="/" class="flex items-center justify-center gap-3 w-full bg-white/5 text-slate-300 font-bold py-4 rounded-2xl transition-all text-[10px] uppercase border border-white/5">Cancelar</a>
             </div>
         </div>
-
-        <p class="mt-8 text-[9px] text-slate-600 uppercase tracking-[5px]">Auto-update cada 10s</p>
+        <div class="mt-8 flex flex-col items-center gap-2">
+            <p class="text-[8px] text-slate-600 uppercase tracking-[5px] font-bold">Actualización cada 10s</p>
+            <div class="w-32 h-1 bg-white/5 rounded-full overflow-hidden">
+                <div id="progress-bar" class="h-full bg-purple-500 w-0 transition-all duration-[10000ms] ease-linear"></div>
+            </div>
+        </div>
     </div>
 
     <script>
         lucide.createIcons();
+        setTimeout(() => { document.getElementById('progress-bar').style.width = '100%'; }, 100);
+
+        const id = "{{ID}}";
+        const checkStatus = setInterval(async () => {
+            try {
+                const res = await fetch(`/api/bot-status/${id}`);
+                const data = await res.json();
+                if (data.status === 'connected') {
+                    clearInterval(checkStatus);
+                    window.location.href = '/?status=success';
+                }
+            } catch (e) {}
+        }, 3000);
+
         setTimeout(() => location.reload(), 10000);
     </script>
 </body>
