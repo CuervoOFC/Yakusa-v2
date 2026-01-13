@@ -9,7 +9,7 @@ Mochi Bot es una plataforma avanzada de gestión de sub-bots para WhatsApp, cons
 * **Doble Método de Vinculación:** Escaneo de código QR tradicional o uso de **Pairing Code** (código de 8 dígitos) para mayor comodidad.
 * **Gestión Multi-Sesión:** Administra múltiples sub-bots de forma simultánea desde una sola interfaz.
 * **Switches de Configuración Real-Time:** * **Bienvenida:** Activa o desactiva mensajes automáticos al entrar nuevos miembros.
-    * **Solo Privados:** Filtra el bot para que solo responda en chats individuales, ignorando grupos.
+* **Solo Privados:** Filtra el bot para que solo responda en chats individuales, ignorando grupos.
 * **Auto-Reconexión:** Sistema inteligente de recuperación ante desconexiones accidentales.
 * **Persistencia de Sesiones:** Carga automática de todos los sub-bots vinculados al reiniciar el servidor principal.
 * **Seguridad y Limpieza:** Opción de eliminación completa de sesión que borra credenciales del disco para proteger la privacidad.
