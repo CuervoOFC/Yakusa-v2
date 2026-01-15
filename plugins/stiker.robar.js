@@ -9,8 +9,8 @@ let handler = async (m, { conn, text, q, mime }) => {
     try {
         let buffer = await q.download();
         let sticker = new Sticker(buffer, {
-            pack: pack || 'BrailleBot Pack',
-            author: auth || 'System',
+            pack: pack || 'Yakuza',
+            author: auth || 'V2',
             type: StickerTypes.FULL,
             quality: 60
         });
@@ -23,4 +23,5 @@ let handler = async (m, { conn, text, q, mime }) => {
 };
 
 handler.command = ['steal', 'robar', 'wm'];
+
 export default handler;
