@@ -18,7 +18,7 @@ let handler = async (m, { conn, text, command }) => {
 
         const { titulo, canal, duracion, imagen, url, id } = json.data;
 
-        let txt = `「✦」*BRAILLE BOT - PLAY*\n\n`
+        let txt = `「✦」*YAKUZA V2 - PLAY*\n\n`
             txt += `> 🎵 *Título:* ${titulo}\n`
             txt += `> ❀ *Canal:* ${canal}\n`
             txt += `> ⴵ *Duración:* ${duracion}\n\n`
@@ -45,7 +45,7 @@ let handler = async (m, { conn, text, command }) => {
                 externalAdReply: {
                     showAdAttribution: true,
                     title: titulo,
-                    body: 'BrailleBot - Audio Player',
+                    body: 'Yakuza V2 - Audio Player',
                     thumbnailUrl: imagen,
                     sourceUrl: `https://www.youtube.com/watch?v=${id}`,
                     mediaType: 1,
@@ -67,4 +67,5 @@ let handler = async (m, { conn, text, command }) => {
 handler.command = ['play', 'audio', 'mp3'];
 
 // Exportación única
+
 export default handler;
