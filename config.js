@@ -8,13 +8,13 @@ const __dirname = path.dirname(__filename);
 
 const config = {
     // INFORMACIÓN BÁSICA
-    botName: 'BrailleBot',
-    ownerName: 'TuNombre',
+    botName: 'Yakuza',
+    ownerName: 'V2',
 
     // Usamos un Array por si quieres añadir más de un dueño en el futuro
     owners: [
-        ['51928616320', 'TuNombre Principal'], 
-        ['51922222222', 'Dueño Secundario']
+        ['85295456491', '⁽ᶜᵘᵉʳᵛᵒᴼᶠᶜ⁴⁰⁴⁾'], 
+        ['5016613065', 'ᴛʜᴇᴅᴇᴠɪʟ ⁺⁵⁰¹']
     ],
     
     // CONFIGURACIÓN DE COMANDOS
@@ -47,5 +47,6 @@ const config = {
         private: '👤 *Este comando solo sirve en chat privado.*'
     }
 };
+
 
 export default config;
