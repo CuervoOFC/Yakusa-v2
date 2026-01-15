@@ -1,71 +1,98 @@
-import axios from 'axios';
+import axios from 'axios'
+import yts from 'yt-search'
 
-let handler = async (m, { conn, text, command }) => {
-    // 1. Validación rápida usando el config o mensajes directos
-    if (!text) return m.reply(`「✦」Ingresa el nombre o link de la canción.`);
+let handler = async (m, { conn, args, command, usedPrefix }) => {
+  if (!args[0]) return m.reply(`✅ Uso correcto: ${usedPrefix + command} <enlace o nombre>`)
 
-    // 2. Reacción de "procesando" (ya soporta await gracias a simple.js)
-    await m.react('🕒');
+ try {
+    let url = args[0]
+    let videoInfo = null
 
-    try {
-        const res = await fetch(`https://api.darkcore.xyz/api/descargar/mp3?url=${encodeURIComponent(text)}`);
-        const json = await res.json();
-
-        if (!json.success) {
-            await m.react('❌');
-            return m.reply("「✦」No se pudo encontrar el video.");
-        }
-
-        const { titulo, canal, duracion, imagen, url, id } = json.data;
-
-        let txt = `「✦」*YAKUZA V2 - PLAY*\n\n`
-            txt += `> 🎵 *Título:* ${titulo}\n`
-            txt += `> ❀ *Canal:* ${canal}\n`
-            txt += `> ⴵ *Duración:* ${duracion}\n\n`
-            txt += `_Enviando audio, espere un momento..._`
-
-        // Enviamos la miniatura con la info
-        await conn.sendMessage(m.chat, { image: { url: imagen }, caption: txt }, { quoted: m });
-
-        // 3. Descarga del buffer
-        const response = await axios.get(url, { 
-            responseType: 'arraybuffer',
-            headers: { 'User-Agent': 'Mozilla/5.0' }
-        });
-        
-        const audioBuffer = Buffer.from(response.data);
-
-        // 4. Envío del audio con ExternalAdReply (Miniatura en el reproductor)
-        await conn.sendMessage(m.chat, {
-            audio: audioBuffer,
-            mimetype: 'audio/mp4',
-            fileName: `${titulo}.mp3`,
-            ptt: false, // Cambia a true si quieres que se envíe como nota de voz
-            contextInfo: {
-                externalAdReply: {
-                    showAdAttribution: true,
-                    title: titulo,
-                    body: 'Yakuza V2 - Audio Player',
-                    thumbnailUrl: imagen,
-                    sourceUrl: `https://www.youtube.com/watch?v=${id}`,
-                    mediaType: 1,
-                    renderLargerThumbnail: true
-                }
-            }
-        }, { quoted: m });
-
-        await m.react('✔️');
-
-    } catch (e) {
-        console.error(e);
-        await m.react('❌');
-        m.reply("「✦」Error: El servidor está saturado o el link es inválido.");
+    if (!url.includes('youtube.com') && !url.includes('youtu.be')) {
+      let search = await yts(args.join(' '))
+      if (!search.videos || search.videos.length === 0) return m.reply('No se encontraron resultados.')
+      videoInfo = search.videos[0]
+      url = videoInfo.url
+    } else {
+      let id = url.split('v=')[1]?.split('&')[0] || url.split('/').pop()
+      let search = await yts({ videoId: id })
+      if (search && search.title) videoInfo = search
     }
+
+    if (videoInfo.seconds > 3780) {
+      return m.reply(`⛔ El video supera el límite de duración permitido (63 minutos).`)
+    }
+
+    let apiUrl = ''
+    let isAudio = false
+
+    if (command == 'play' || command == 'ytmp3') {
+      apiUrl = `https://optishield.uk/api/?type=youtubedl&apikey=0fa6207184ecbcf7ee08b01e2677c308&url=${encodeURIComponent(url)}&video=0`
+      isAudio = true
+    } else if (command == 'play2' || command == 'ytmp4') {
+      apiUrl = `https://optishield.uk/api/?type=youtubedl&apikey=0fa6207184ecbcf7ee08b01e2677c308&url=${encodeURIComponent(url)}&video=1`
+    } else {
+      return m.reply('Comando no reconocido.')
+    }
+
+
+    const response = await axios.get(apiUrl)
+    const json = response.data
+    
+    if (!json.status || !json.result) {
+        throw new Error('La API no devolvió un enlace válido.')
+    }
+
+    let downloadUrl = json.result.download ? json.result.download : json.result
+    let title = videoInfo.title || 'Archivo'
+    let thumbnail = videoInfo.thumbnail || videoInfo.image || ''
+    let duration = videoInfo?.timestamp || 'Desconocida'
+
+    let details = `
+📌 Título : *${title}*
+📁 Duración : *${duration}*
+📥 Calidad : *Alta*
+🎧 Tipo : *${isAudio ? 'Audio' : 'Video'}*
+🌐 Fuente : *YouTube*`.trim()
+
+    // Enviar mensaje informativo
+    await conn.sendMessage(m.chat, {
+      text: details,
+      contextInfo: {
+        externalAdReply: {
+          title: `${title}`,
+          body: 'Enviando contenido...',
+          thumbnailUrl: thumbnail,
+          sourceUrl: 'https://whatsapp.com/channel/0029VbArz9fAO7RGy2915k3O',
+          mediaType: 1,
+          renderLargerThumbnail: true
+        }
+      }
+    }, { quoted: m })
+
+    // Enviar el archivo final
+    if (isAudio) {
+      await conn.sendMessage(m.chat, {
+        audio: { url: downloadUrl },
+        mimetype: 'audio/mpeg',
+        fileName: `${title}.mp3`
+      }, { quoted: m })
+    } else {
+      await conn.sendMessage(m.chat, {
+        video: { url: downloadUrl },
+        mimetype: 'video/mp4',
+        fileName: `${title}.mp4`
+      }, { quoted: m })
+    }
+
+  } catch (e) {
+    console.error('Error en Play:', e)
+    m.reply('❌ Lo siento, hubo un error al procesar tu solicitud con Axios.')
+  }
 }
 
-// Vinculamos el comando
-handler.command = ['play', 'audio', 'mp3'];
+handler.help = ['play', 'ytmp3', 'play2', 'ytmp4']
+handler.tags = ['downloader']
+handler.command = ['play', 'play2', 'ytmp3', 'ytmp4']
 
-// Exportación única
-
-export default handler;
+export default handler
