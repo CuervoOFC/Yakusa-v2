@@ -15,14 +15,14 @@ let handler = async (m, { conn }) => {
     message += `🤖 *Total:* ${users.length}\n\n`
 
     users.forEach((user, i) => {
-        let name = conn.getName(user) || 'Sub-Bot'
+        let name = conn.getName(user) || 'yakuza'
         message += `${i + 1}. 👤 *Nombre:* ${name}\n`
         message += `   📱 *Número:* @${user.split('@')[0]}\n`
         message += `   🟢 *Estado:* Online\n\n`
     })
 
     message += `━━━━━━━━━━━━━━━━━━━━\n`
-    message += `*Mochi Bot System*`
+    message += `*Yakuza V2 System*`
 
     await conn.sendMessage(m.chat, { 
         text: message, 
@@ -33,5 +33,6 @@ let handler = async (m, { conn }) => {
 handler.help = ['listajadibots', 'subbots']
 handler.tags = ['main']
 handler.command = ['jadibots', 'subbots', 'listajadibots', 'bots']
+
 
 export default handler
