@@ -9,8 +9,8 @@ let handler = async (m, { conn, q, mime, isMedia }) => {
         let buffer = await downloadMediaMessage(q, 'buffer', {}, { logger: console, reuploadRequest: conn.updateMediaMessage });
         
         let sticker = new Sticker(buffer, {
-            pack: 'BrailleBot',
-            author: m.pushName || 'Bot',
+            pack: 'YAKUZA',
+            author: m.pushName || 'V2',
             type: StickerTypes.FULL,
             quality: 50
         });
@@ -24,4 +24,5 @@ let handler = async (m, { conn, q, mime, isMedia }) => {
 };
 
 handler.command = ['s', 'sticker'];
+
 export default handler;
