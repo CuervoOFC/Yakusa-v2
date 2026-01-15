@@ -14,7 +14,7 @@ let handler = async (m, { conn }) => {
     const totalRam = (os.totalmem() / 1024 / 1024 / 1024).toFixed(1);
 
     const info = `┏━━━━ *BOT SYSTEM INFO* ━━━━┓\n` +
-                 `┃ 🤖 *Nombre:* BrailleBot\n` +
+                 `┃ 🤖 *Nombre:* Yakuza V2\n` +
                  `┃ 🕒 *Uptime:* ${formatUptime(uptime)}\n` +
                  `┃ 📊 *RAM:* ${ram}MB / ${totalRam}GB\n` +
                  `┃ ⚙️ *Plataforma:* ${os.platform()}\n` +
@@ -24,4 +24,5 @@ let handler = async (m, { conn }) => {
 };
 
 handler.command = ['info', 'botinfo', 'status'];
+
 export default handler;
